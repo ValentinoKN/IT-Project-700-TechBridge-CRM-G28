@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Customers</h1>
+
+<form method="post" class="simple-form">
+    <label>Company name<input name="company_name" required></label>
+    <label>Contact person<input name="contact_name" required></label>
+    <label>Email<input name="email" type="email" required></label>
+    <label>Phone<input name="phone"></label>
+    <button type="submit">Add customer</button>
+</form>
+
+<h2>Customer list</h2>
+{% if customers %}
+<table>
+    <tr><th>Company</th><th>Contact person</th><th>Email</th><th>Phone</th></tr>
+    {% for customer in customers %}
+    <tr><td>{{ customer.company_name }}</td><td>{{ customer.contact_name }}</td><td>{{ customer.email }}</td><td>{{ customer.phone or '-' }}</td></tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No customers added yet.</p>
+{% endif %}
+{% endblock %}
+
