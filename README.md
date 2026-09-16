@@ -38,14 +38,35 @@ The `crm.db` database file is created automatically. It is not uploaded to GitHu
 
 ## GitHub workflow for the group
 
-Do not edit directly on the `main` branch. Make a branch, commit your work, push it, then ask the team to check it.
+### Get the project from GitHub
+
+1. Open PowerShell where you want to keep the project.
+2. Download the code:
+
+   ```powershell
+   git clone https://github.com/ValentinoKN/IT-Project-700-TechBridge-CRM-G28.git
+   cd IT-Project-700-TechBridge-CRM-G28
+   ```
+
+3. Follow the **Run it on your computer** steps above.
+
+### Make your own changes
+
+Do not edit directly on the `main` branch. Make a branch, commit your work, push it, then ask the team to check it. Before you start, download any changes the team already pushed:
 
 ```powershell
-git checkout -b your-name-feature
+git checkout main
+git pull origin main
+```
+
+```powershell
+git checkout -b rene-customer-page
 git add .
 git commit -m "Add customer page"
-git push -u origin your-name-feature
+git push -u origin rene-customer-page
 ```
+
+On GitHub, open a pull request from your branch into `main`. Valentino can check it and merge it when it works. Keep commits small and use clear messages so everyone can see who did what.
 
 ## Suggested first jobs
 
@@ -55,4 +76,3 @@ git push -u origin your-name-feature
 - Logan: simple CSS and page layout
 - Yache: testing checklist and test data
 - Ryan: README and installation screenshots
-
