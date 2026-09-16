@@ -2,13 +2,17 @@ import sqlite3
 from pathlib import Path
 
 from flask import Flask, flash, g, redirect, render_template, request, url_for
+from jinja2 import ChoiceLoader, FileSystemLoader
 
 
 BASE_DIR = Path(__file__).resolve().parent
 DATABASE = BASE_DIR / "crm.db"
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 app.config["SECRET_KEY"] = "techbridge-class-project"
+app.jinja_loader = ChoiceLoader(
+    [FileSystemLoader(BASE_DIR / "templates"), FileSystemLoader(BASE_DIR)]
+)
 
 
 def get_db():
@@ -152,4 +156,3 @@ def change_ticket_status(ticket_id):
 if __name__ == "__main__":
     setup_database()
     app.run(debug=True)
-
