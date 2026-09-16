@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Dashboard</h1>
+<p>Quick view of TechBridge customer support work.</p>
+
+<section class="cards">
+    <div class="card"><strong>{{ customer_total }}</strong><span>Customers</span></div>
+    <div class="card"><strong>{{ ticket_total }}</strong><span>Tickets logged</span></div>
+    <div class="card"><strong>{{ open_total }}</strong><span>Tickets still open</span></div>
+</section>
+
+<h2>Latest tickets</h2>
+{% if recent_tickets %}
+<table>
+    <tr><th>ID</th><th>Customer</th><th>Subject</th><th>Priority</th><th>Status</th></tr>
+    {% for ticket in recent_tickets %}
+    <tr>
+        <td>#{{ ticket.id }}</td>
+        <td>{{ ticket.company_name }}</td>
+        <td>{{ ticket.subject }}</td>
+        <td>{{ ticket.priority }}</td>
+        <td>{{ ticket.status }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No tickets yet. Add a customer first, then log a ticket.</p>
+{% endif %}
+{% endblock %}
+
