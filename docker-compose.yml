@@ -1,4 +1,5 @@
 services:
+  # PostgreSQL holds the CRM data. Docker keeps it separate from the Django web app.
   db:
     image: postgres:16
     environment:
@@ -14,6 +15,7 @@ services:
       retries: 10
 
   web:
+    # This is the app people open in the browser on localhost:8000.
     build: .
     command: sh -c "python manage.py migrate && python manage.py seed_demo && python manage.py runserver 0.0.0.0:8000"
     ports:

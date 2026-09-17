@@ -6,6 +6,7 @@ class Command(BaseCommand):
     help = "Creates demo users for the class project"
 
     def handle(self, *args, **options):
+        # These are deliberately fake class accounts. get_or_create makes the command safe to run again.
         demo_users = [
             ("admin", "Administrator", User.ADMIN, True),
             ("manager", "Manager", User.MANAGER, False),
@@ -17,4 +18,3 @@ class Command(BaseCommand):
                 user.set_password("DemoPass123!")
                 user.save()
         self.stdout.write(self.style.SUCCESS("Demo users are ready."))
-

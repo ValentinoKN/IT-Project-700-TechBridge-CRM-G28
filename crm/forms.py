@@ -6,6 +6,7 @@ class BootstrapForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
+            # This adds the same Bootstrap look without styling every HTML input by hand.
             field.widget.attrs["class"] = "form-control"
 
 
@@ -40,4 +41,3 @@ class ActivityForm(BootstrapForm):
         model = Activity
         fields = ["contact", "deal", "activity_type", "detail", "owner"]
         widgets = {"detail": forms.Textarea(attrs={"rows": 3})}
-

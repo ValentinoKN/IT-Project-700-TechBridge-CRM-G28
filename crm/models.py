@@ -12,6 +12,7 @@ class User(AbstractUser):
 
     @property
     def can_manage_all(self):
+        # One simple role check used by the views instead of repeating the same if statement everywhere.
         return self.is_superuser or self.role in [self.ADMIN, self.MANAGER]
 
 
@@ -20,6 +21,7 @@ class Company(models.Model):
     industry = models.CharField(max_length=80, blank=True)
     phone = models.CharField(max_length=30, blank=True)
     email = models.EmailField(blank=True)
+    # PROTECT means we do not accidentally remove a user while their company records still exist.
     account_manager = models.ForeignKey(User, on_delete=models.PROTECT, related_name="companies")
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -91,6 +93,6 @@ class Activity(models.Model):
         ordering = ["-created_at"]
 
     def clean(self):
+        # An activity must be about one thing. Both blank or both selected makes the record confusing.
         if bool(self.contact) == bool(self.deal):
             raise ValidationError("Choose one linked contact or one linked deal.")
-

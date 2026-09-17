@@ -10,6 +10,7 @@ from .models import Activity, Company, Contact, Deal, Lead
 
 
 def own_or_all(user, queryset, owner_field):
+    # Reps only get their own records. Managers/admins get the full list. This is the main access rule.
     return queryset if user.can_manage_all else queryset.filter(**{owner_field: user})
 
 
@@ -19,6 +20,7 @@ def allow_record(user, record, owner_name):
 
 
 def list_context(request, queryset, search_fields):
+    # One tiny reusable search helper keeps all list pages working the same way.
     term = request.GET.get("q", "").strip()
     if term:
         condition = Q()
@@ -70,6 +72,7 @@ def company_form(request, pk=None):
     if form.is_valid():
         saved = form.save(commit=False)
         if not request.user.can_manage_all:
+            # A rep cannot quietly assign a new company to somebody else using the form.
             saved.account_manager = request.user
         saved.save()
         messages.success(request, "Company saved.")
@@ -129,6 +132,7 @@ def convert_lead(request, pk):
     allow_record(request.user, lead, "assigned_to")
     if request.method != "POST" or lead.status == "Converted":
         return redirect("lead_list")
+    # Converting creates a basic deal first, so the team can edit title/value/stage after conversion.
     Deal.objects.create(contact=lead.contact, title=f"Deal for {lead.contact}", owner=lead.assigned_to)
     lead.status = "Converted"
     lead.save(update_fields=["status"])
@@ -180,6 +184,7 @@ def activity_form(request):
 
 @login_required
 def export_csv(request, record_type):
+    # CSV is plain spreadsheet-friendly text. It is enough for the project export requirement.
     response = HttpResponse(content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="{record_type}.csv"'
     writer = csv.writer(response)

@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+# BASE_DIR is the main project folder. Keeping this in one place avoids hard-coded laptop paths.
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get("SECRET_KEY", "change-this-before-a-real-deployment")
 DEBUG = os.environ.get("DEBUG", "1") == "1"
@@ -39,6 +40,7 @@ TEMPLATES = [{
 }]
 WSGI_APPLICATION = "config.wsgi.application"
 
+# Docker uses PostgreSQL below. SQLite is only a small fallback for quick local automated tests.
 if os.environ.get("USE_SQLITE") == "1":
     DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "test.sqlite3"}}
 else:
@@ -58,6 +60,7 @@ USE_I18N = True
 USE_TZ = True
 STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# The CRM has its own User model because each user needs a role as well as a username/password.
 AUTH_USER_MODEL = "crm.User"
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
