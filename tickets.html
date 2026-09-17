@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Support tickets</h1>
+
+{% if customers %}
+<form method="post" class="simple-form">
+    <label>Customer
+        <select name="customer_id" required>
+            <option value="">Choose customer</option>
+            {% for customer in customers %}<option value="{{ customer.id }}">{{ customer.company_name }}</option>{% endfor %}
+        </select>
+    </label>
+    <label>Subject<input name="subject" required></label>
+    <label>Description<textarea name="description" required></textarea></label>
+    <label>Priority
+        <select name="priority"><option>Low</option><option selected>Medium</option><option>High</option></select>
+    </label>
+    <button type="submit">Log ticket</button>
+</form>
+{% else %}
+<p>Add a customer before logging a ticket.</p>
+{% endif %}
+
+<h2>Ticket list</h2>
+{% if tickets %}
+<table>
+    <tr><th>ID</th><th>Customer</th><th>Subject</th><th>Priority</th><th>Status</th><th>Change status</th></tr>
+    {% for ticket in tickets %}
+    <tr>
+        <td>#{{ ticket.id }}</td><td>{{ ticket.company_name }}</td><td>{{ ticket.subject }}</td><td>{{ ticket.priority }}</td><td>{{ ticket.status }}</td>
+        <td>
+            <form method="post" action="{{ url_for('change_ticket_status', ticket_id=ticket.id) }}" class="status-form">
+                <select name="status"><option>Open</option><option>In Progress</option><option>Closed</option></select>
+                <button>Save</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<p>No tickets logged yet.</p>
+{% endif %}
+{% endblock %}
+
