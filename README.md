@@ -1,119 +1,105 @@
 # TechBridge MSP CRM
 
-A small beginner-friendly CRM for the ITP700 group project. It runs on a laptop using Flask and SQLite, so there are no paid APIs or cloud services needed.
+A simple Customer Relationship Management system for the ITP700 Group 28 project. It uses Django, PostgreSQL, Docker and Bootstrap. All data is fictional and there are no paid APIs.
 
-## What it does now
+## What the system does
 
-- Add and view customers
-- Add and view support tickets
-- Change a ticket status
-- See simple totals on the dashboard
+- Users log in as an Administrator, Manager or Representative.
+- Stores companies and their linked contacts.
+- Tracks leads from New to Contacted, Qualified, Converted or Lost.
+- Converts a lead into a deal.
+- Tracks deals, values and expected closing dates.
+- Logs calls, emails, meetings and notes.
+- Shows a basic dashboard and exports companies, leads and deals to CSV.
+- Representatives can only open records assigned to them. Managers and administrators can view all records.
 
-## Run it on your computer
+## First-time setup in VS Code
 
-1. Install Python 3.10 or newer.
-2. Open a terminal in this project folder.
-3. Create a virtual environment:
+Do not download a ZIP file. Each person clones the repository once, which makes a linked local working folder.
 
-   ```powershell
-   py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   ```
-
-4. Install the packages:
-
-   ```powershell
-   pip install -r requirements.txt
-   ```
-
-5. Start the app:
-
-   ```powershell
-   python app.py
-   ```
-
-6. Open `http://127.0.0.1:5000` in your browser.
-
-The `crm.db` database file is created automatically. It is not uploaded to GitHub because every member can start with a clean database.
-
-## Working from VS Code and GitHub
-
-Do not download the project as a ZIP file. Each person should **clone** it once in VS Code. Cloning makes a local working folder that is linked to this GitHub repository.
-
-### First setup in VS Code
-
-1. Install [Git](https://git-scm.com/downloads), [Python](https://www.python.org/downloads/) and [Visual Studio Code](https://code.visualstudio.com/).
-2. Open VS Code.
-3. Press `Ctrl + Shift + P`, choose **Git: Clone**, then paste this link:
+1. Install [Git](https://git-scm.com/downloads), [Docker Desktop](https://www.docker.com/products/docker-desktop/) and [VS Code](https://code.visualstudio.com/).
+2. Open VS Code and press `Ctrl + Shift + P`.
+3. Select **Git: Clone** and paste:
 
    ```text
    https://github.com/ValentinoKN/IT-Project-700-TechBridge-CRM-G28.git
    ```
 
-4. Choose a folder on your laptop and click **Open** when VS Code asks.
-5. In VS Code, open **Terminal > New Terminal** and run:
+4. Choose a folder, then click **Open** when VS Code asks.
+5. Make sure Docker Desktop is running.
+6. In VS Code choose **Terminal > New Terminal** and run:
 
    ```powershell
-   py -m venv .venv
-   .\.venv\Scripts\Activate.ps1
-   pip install -r requirements.txt
-   python app.py
+   docker compose up --build
    ```
 
-6. Open `http://127.0.0.1:5000` in your browser. Stop the app with `Ctrl + C` in the terminal.
+7. Open `http://localhost:8000` in your browser.
 
-### Before you start work
+The first run downloads the free Docker images, creates the PostgreSQL database and adds demo users. Later, use `docker compose up` only. Stop the system with `Ctrl + C`.
 
-Always get the newest team work first. In the VS Code terminal, run:
+## Demo login details
+
+| User | Password | Role |
+| --- | --- | --- |
+| `admin` | `DemoPass123!` | Administrator |
+| `manager` | `DemoPass123!` | Manager |
+| `rep` | `DemoPass123!` | Representative |
+
+These are only for the class demo. Do not use them in a real system.
+
+## Daily GitHub workflow
+
+Before starting work, open the VS Code terminal and get the latest work:
 
 ```powershell
 git checkout main
 git pull origin main
 ```
 
-Then make your own branch. Use your name and the thing you are doing:
+Make your own branch. Use your name and feature:
 
 ```powershell
-git checkout -b rene-customer-page
+git checkout -b tokelo-company-contact
 ```
 
-### Save and send your changes
-
-Make your changes in VS Code. Test the app. Then use the Source Control icon on the left of VS Code, or run these commands:
+Make your changes, run the system, then save them to GitHub:
 
 ```powershell
 git add .
-git commit -m "Add customer page"
-git push -u origin rene-customer-page
+git commit -m "Add company contact validation"
+git push -u origin tokelo-company-contact
 ```
 
-After pushing, open GitHub. Create a pull request from your branch into `main`. Valentino checks that it works before merging it. This makes it clear what each person worked on.
+Open GitHub and create a pull request from your branch into `main`. Valentino checks the work before merging it. Do not work directly on `main`.
 
-### Important Git words
+## Basic Git words
 
-- **Repository (repo):** the project folder on GitHub with its full history.
-- **Clone:** make the first linked copy of the repo on your laptop. It is not a ZIP download.
-- **Main:** the main working version of the project. Do not change it directly.
-- **Branch:** your own safe copy of the work, for example `logan-page-layout`.
-- **Commit:** a saved checkpoint with a short message saying what you changed.
-- **Push:** send your committed work from your laptop to GitHub.
-- **Pull:** bring the latest team work from GitHub onto your laptop.
-- **Pull request:** a request to add your branch work into `main` after somebody checks it.
-- **Merge:** add an approved pull request into `main`.
+- **Repository / repo:** the project and its history on GitHub.
+- **Clone:** make the first linked copy of the repo on your laptop.
+- **Branch:** your own work area, separate from the main version.
+- **Commit:** a saved checkpoint with a message explaining the change.
+- **Push:** send your commits from your computer to GitHub.
+- **Pull:** get the latest team changes from GitHub.
+- **Pull request:** asks for your branch to be checked and merged into `main`.
+- **Merge:** adds approved work into the main version.
 
-### Basic rules for the group
+## Useful commands
 
-- Pull before you start.
-- Work on your own branch.
-- Test before pushing.
-- Commit small changes with clear messages.
-- Never upload the `crm.db` file or `.venv` folder.
+```powershell
+docker compose up --build       # first run after code changes
+docker compose up               # normal run
+docker compose down             # stop containers
+docker compose down -v          # stop and erase local demo database
+docker compose exec web python manage.py test  # run tests
+```
 
-## Suggested first jobs
+Never upload passwords for real users, `.env` files, database backups or real customer data to GitHub.
 
-- Valentino: project setup, dashboard and final merge
-- Rene: customer form and validation
-- Tokelo: ticket form and validation
-- Logan: simple CSS and page layout
-- Yache: testing checklist and test data
-- Ryan: README and installation screenshots
+## Suggested responsibilities
+
+- Valentino: GitHub, Docker, final merge and dashboard.
+- Rene: requirements, forms and documentation checks.
+- Tokelo: companies, contacts and database relations.
+- Logan: leads, deals and dashboard list pages.
+- Yache: roles, validation, activities and permissions.
+- Ryan: testing evidence, README and install checks.

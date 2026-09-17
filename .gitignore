@@ -4,6 +4,8 @@ __pycache__/
 venv/
 crm.db
 .env
+.deps/
+test.sqlite3
 .DS_Store
 outputs/
 work/

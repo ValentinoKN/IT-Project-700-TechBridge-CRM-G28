@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3"><h1 class="h3">Leads</h1><div><a class="btn btn-outline-secondary" href="{% url 'export_csv' 'leads' %}">Export CSV</a> <a class="btn btn-dark" href="{% url 'lead_add' %}">Add lead</a></div></div>
+<form class="mb-3"><input name="q" value="{{ term }}" class="form-control" placeholder="Search lead"></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0"><tr><th>Contact</th><th>Source</th><th>Status</th><th>Owner</th><th></th></tr>{% for item in leads %}<tr><td>{{ item.contact }}</td><td>{{ item.source }}</td><td>{{ item.status }}</td><td>{{ item.assigned_to.username }}</td><td><a href="{% url 'lead_edit' item.pk %}">Edit</a>{% if item.status != 'Converted' and item.status != 'Lost' %}<form class="d-inline" method="post" action="{% url 'lead_convert' item.pk %}">{% csrf_token %}<button class="btn btn-sm btn-link">Convert</button></form>{% endif %}</td></tr>{% empty %}<tr><td colspan="5">No leads found.</td></tr>{% endfor %}</table></div></div>
+{% endblock %}
+

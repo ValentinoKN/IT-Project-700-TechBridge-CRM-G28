@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between mb-3"><h1 class="h3">Companies</h1><div><a class="btn btn-outline-secondary" href="{% url 'export_csv' 'companies' %}">Export CSV</a> <a class="btn btn-dark" href="{% url 'company_add' %}">Add company</a></div></div>
+<form class="mb-3"><input name="q" value="{{ term }}" class="form-control" placeholder="Search company, industry or email"></form>
+<div class="card"><div class="table-responsive"><table class="table mb-0"><tr><th>Company</th><th>Industry</th><th>Email</th><th>Manager</th><th></th></tr>{% for item in companies %}<tr><td>{{ item.name }}</td><td>{{ item.industry }}</td><td>{{ item.email }}</td><td>{{ item.account_manager.username }}</td><td><a href="{% url 'company_edit' item.pk %}">Edit</a></td></tr>{% empty %}<tr><td colspan="5">No companies found.</td></tr>{% endfor %}</table></div></div>
+{% endblock %}
+

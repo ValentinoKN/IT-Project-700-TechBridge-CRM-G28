@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3"><div><h1 class="h3 mb-0">Dashboard</h1><small class="text-muted">Quick view of your CRM work.</small></div></div>
+<div class="row g-3 mb-4">
+  <div class="col-md-4"><div class="card"><div class="card-body"><small class="text-muted">Leads</small><div class="card-number">{{ lead_total }}</div></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body"><small class="text-muted">Open deals</small><div class="card-number">{{ open_deal_total }}</div></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body"><small class="text-muted">Pipeline value</small><div class="card-number">R{{ pipeline_value }}</div></div></div></div>
+</div>
+<div class="card"><div class="card-body"><h2 class="h5">Recent activities</h2>
+  {% if recent_activities %}<table class="table table-sm"><tr><th>Type</th><th>Details</th><th>Owner</th><th>Date</th></tr>
+  {% for item in recent_activities %}<tr><td>{{ item.activity_type }}</td><td>{{ item.detail|truncatechars:60 }}</td><td>{{ item.owner.username }}</td><td>{{ item.created_at|date:'d M Y H:i' }}</td></tr>{% endfor %}</table>
+  {% else %}<p class="mb-0 text-muted">No activities logged yet.</p>{% endif %}
+</div></div>
+{% endblock %}
+
