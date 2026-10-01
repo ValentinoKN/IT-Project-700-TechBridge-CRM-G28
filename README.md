@@ -1,5 +1,9 @@
 # TechBridge MSP CRM
 
+## Current project stage
+
+The CRM is still a prototype. Phase 3 is due 9 October, Phase 4 on 30 October and Phase 5 on 9 November 2026. See [project documents](docs/README.md) for the Phase 3 review, group tasks and remaining implementation checks. The documentation update does not mean the app has passed testing.
+
 ## The quick version
 
 This is Group 28's basic CRM for the ITP700 IT Project. It is made for a fictional small IT support business called **TechBridge MSP**. It lets the team keep companies, contacts, leads, deals and follow-up activities in one place.
@@ -9,7 +13,7 @@ Everything in this project is for the class demo only. The users, passwords and 
 If you just want to run it, do this:
 
 1. Install Git, VS Code and Docker Desktop.
-2. Clone this repo in VS Code. Do **not** download a ZIP folder.
+2. Clone this repo in VS Code for group development. A ZIP copy can be used for an installation handover; it does not include Git history.
 3. Start Docker Desktop and wait until it says it is running.
 4. Open the VS Code terminal inside the project folder.
 5. Run `docker compose up --build`.
