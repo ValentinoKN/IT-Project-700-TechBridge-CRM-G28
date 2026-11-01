@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import ProtectedError
 
 from .models import Activity, Company, Contact, Lead, User
 
@@ -72,3 +73,12 @@ class CrmTests(TestCase):
 
     def test_contact_gets_created_date_automatically(self):
         self.assertIsNotNone(self.contact.created_at)
+
+    def test_company_with_contacts_cannot_be_deleted(self):
+        company = self.contact.company
+
+        with self.assertRaises(ProtectedError):
+            company.delete()
+
+        self.assertTrue(Company.objects.filter(pk=company.pk).exists())
+        self.assertTrue(Contact.objects.filter(pk=self.contact.pk).exists())

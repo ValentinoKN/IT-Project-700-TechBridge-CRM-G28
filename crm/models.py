@@ -38,7 +38,8 @@ class Company(models.Model):
 
 
 class Contact(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name="contacts")
+    # PROTECT stops a company being deleted while it still has contacts. CASCADE would have deleted its whole history with it.
+    company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="contacts")
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField()
@@ -56,7 +57,8 @@ class Contact(models.Model):
 
 class Lead(models.Model):
     STATUS_CHOICES = [("New", "New"), ("Contacted", "Contacted"), ("Qualified", "Qualified"), ("Converted", "Converted"), ("Lost", "Lost")]
-    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name="leads")
+    # Same rule for contacts: one with leads, deals or activities cannot be deleted.
+    contact = models.ForeignKey(Contact, on_delete=models.PROTECT, related_name="leads")
     source = models.CharField(max_length=80)
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="New")
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, related_name="leads")
@@ -72,7 +74,7 @@ class Lead(models.Model):
 
 class Deal(models.Model):
     STAGE_CHOICES = [("Prospecting", "Prospecting"), ("Proposal", "Proposal"), ("Negotiation", "Negotiation"), ("Won", "Won"), ("Lost", "Lost")]
-    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name="deals")
+    contact = models.ForeignKey(Contact, on_delete=models.PROTECT, related_name="deals")
     title = models.CharField(max_length=120)
     stage = models.CharField(max_length=15, choices=STAGE_CHOICES, default="Prospecting")
     value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
@@ -89,8 +91,8 @@ class Deal(models.Model):
 
 class Activity(models.Model):
     TYPE_CHOICES = [("Call", "Call"), ("Email", "Email"), ("Meeting", "Meeting"), ("Note", "Note")]
-    contact = models.ForeignKey(Contact, on_delete=models.CASCADE, related_name="activities", null=True, blank=True)
-    deal = models.ForeignKey(Deal, on_delete=models.CASCADE, related_name="activities", null=True, blank=True)
+    contact = models.ForeignKey(Contact, on_delete=models.PROTECT, related_name="activities", null=True, blank=True)
+    deal = models.ForeignKey(Deal, on_delete=models.PROTECT, related_name="activities", null=True, blank=True)
     activity_type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     detail = models.TextField()
     owner = models.ForeignKey(User, on_delete=models.PROTECT, related_name="activities")
