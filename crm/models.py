@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.functions import Lower, Trim
 
 
 class User(AbstractUser):
@@ -27,6 +28,10 @@ class Company(models.Model):
 
     class Meta:
         ordering = ["name"]
+        constraints = [
+            # The database treats "Cedar IT" and " cedar it " as the same name. This still works if someone skips the form.
+            models.UniqueConstraint(Lower(Trim("name")), name="unique_company_name_ignoring_case", violation_error_message="A company with this name already exists."),
+        ]
 
     def __str__(self):
         return self.name

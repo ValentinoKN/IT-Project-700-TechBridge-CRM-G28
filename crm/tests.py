@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError, transaction
 
 from .models import Activity, Company, Contact, Lead, User
 
@@ -44,3 +45,27 @@ class CrmTests(TestCase):
 
         with self.assertRaisesMessage(ValidationError, "Choose one linked contact or one linked deal."):
             activity.full_clean()
+
+    def test_company_form_rejects_same_name_with_different_case_and_spaces(self):
+        self.client.login(username="repone", password="testpass")
+
+        response = self.client.post(reverse("company_add"), {"name": "  demo co  ", "account_manager": self.rep_one.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "A company with this name already exists.")
+        self.assertEqual(Company.objects.count(), 1)
+
+    def test_company_can_keep_its_own_name_when_edited(self):
+        company = self.contact.company
+        self.client.login(username="repone", password="testpass")
+
+        response = self.client.post(reverse("company_edit", args=[company.id]), {"name": "Demo Co", "industry": "IT support", "account_manager": self.rep_one.id})
+
+        company.refresh_from_db()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(company.industry, "IT support")
+
+    def test_database_rejects_duplicate_company_name(self):
+        # This skips the form on purpose to show the database rule works on its own.
+        with self.assertRaises(IntegrityError), transaction.atomic():
+            Company.objects.create(name=" demo co ", account_manager=self.rep_two)
