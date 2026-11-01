@@ -82,3 +82,43 @@ class CrmTests(TestCase):
 
         self.assertTrue(Company.objects.filter(pk=company.pk).exists())
         self.assertTrue(Contact.objects.filter(pk=self.contact.pk).exists())
+
+    def test_valid_contact_saves(self):
+        self.client.login(username="repone", password="testpass")
+
+        response = self.client.post(reverse("contact_add"), {"company": self.contact.company.id, "first_name": "Lee", "last_name": "New", "email": "lee@example.com", "assigned_to": self.rep_one.id})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(Contact.objects.filter(email="lee@example.com").exists())
+
+    def test_invalid_contact_shows_errors_and_keeps_typed_values(self):
+        self.client.login(username="repone", password="testpass")
+
+        response = self.client.post(reverse("contact_add"), {"company": self.contact.company.id, "first_name": "", "last_name": "Typed", "email": "not-an-email", "assigned_to": self.rep_one.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This field is required.")
+        self.assertContains(response, "Enter a valid email address.")
+        self.assertContains(response, 'value="Typed"')
+        self.assertEqual(Contact.objects.count(), 1)
+
+    def test_representative_cannot_add_contact_to_another_reps_company(self):
+        # The company ID is sent by hand, as if someone edited the page to get around the dropdown.
+        self.client.login(username="reptwo", password="testpass")
+
+        response = self.client.post(reverse("contact_add"), {"company": self.contact.company.id, "first_name": "Lee", "last_name": "New", "email": "lee@example.com", "assigned_to": self.rep_two.id})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Select a valid choice.")
+        self.assertEqual(Contact.objects.count(), 1)
+
+    def test_representative_can_keep_company_someone_else_manages_when_editing_contact(self):
+        other_company = Company.objects.create(name="Other Co", account_manager=self.rep_two)
+        contact = Contact.objects.create(company=other_company, first_name="Alex", last_name="Other", email="alex@example.com", assigned_to=self.rep_one)
+        self.client.login(username="repone", password="testpass")
+
+        response = self.client.post(reverse("contact_edit", args=[contact.id]), {"company": other_company.id, "first_name": "Alex", "last_name": "Other", "email": "alex@example.com", "phone": "0821234567", "assigned_to": self.rep_one.id})
+
+        contact.refresh_from_db()
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(contact.phone, "0821234567")

@@ -35,7 +35,9 @@ def limit_form_choices(form, user):
     if user.can_manage_all:
         return form
     if "company" in form.fields:
-        form.fields["company"].queryset = Company.objects.filter(account_manager=user)
+        # A rep can keep the company a contact already has, even if someone else manages it.
+        # Picking a different company is still limited to the rep's own companies.
+        form.fields["company"].queryset = Company.objects.filter(Q(account_manager=user) | Q(pk=form.instance.company_id))
     if "contact" in form.fields:
         form.fields["contact"].queryset = Contact.objects.filter(assigned_to=user)
     if "deal" in form.fields:
