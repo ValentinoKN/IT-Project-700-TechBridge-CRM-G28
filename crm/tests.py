@@ -69,3 +69,6 @@ class CrmTests(TestCase):
         # This skips the form on purpose to show the database rule works on its own.
         with self.assertRaises(IntegrityError), transaction.atomic():
             Company.objects.create(name=" demo co ", account_manager=self.rep_two)
+
+    def test_contact_gets_created_date_automatically(self):
+        self.assertIsNotNone(self.contact.created_at)

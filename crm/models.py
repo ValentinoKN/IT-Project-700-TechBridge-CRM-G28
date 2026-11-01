@@ -44,6 +44,8 @@ class Contact(models.Model):
     email = models.EmailField()
     phone = models.CharField(max_length=30, blank=True)
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, related_name="contacts")
+    # Contacts saved before this field existed get the date the migration ran. Their real creation date was never recorded.
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["last_name", "first_name"]
