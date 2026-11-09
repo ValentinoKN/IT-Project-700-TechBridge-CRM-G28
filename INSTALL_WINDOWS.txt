@@ -1,0 +1,56 @@
+TechBridge CRM - Windows demonstration
+
+FIRST RUN
+1. Use Windows 10/11 x64. Download TechBridgeCRM_Windows_x64.zip and choose Extract All.
+2. Keep TechBridgeCRM.exe and the _internal folder together. Do not run it inside the
+   ZIP. No separate Python, Docker or database installation is needed.
+3. Open TechBridgeCRM.exe. Choose a password of at least ten characters when asked.
+   Nothing appears while typing the password; that is normal.
+4. The browser opens http://127.0.0.1:8000. If not, type that address yourself.
+5. Log in as admin, manager or rep with the password you chose. These are local demo
+   accounts. Only use fictional records. The admin manages users in Staff admin.
+
+USING IT
+Keep the application window open. Add a company, contact and lead, in that order.
+Convert the lead to a deal, set its value and log an activity. The manager sees all
+business records; the rep sees assigned records. Email activities are notes, not
+sent messages. Export is available for Companies, Leads and Deals.
+For fictional examples, stop the app and run Add sample records.cmd.
+To stop, press Ctrl+C in the application window. Closing the browser does not stop
+the server. Restart by opening TechBridgeCRM.exe. Internet is not needed after the
+complete ZIP has been downloaded and extracted, including styling and navigation.
+
+DATA AND BACKUPS
+Records: %LOCALAPPDATA%\TechBridgeCRM\crm.sqlite3
+Installation secret: local-settings.json in the same folder. Keep both private.
+A safety copy is made in the backups subfolder before each normal restart.
+Stop the app and run Backup.cmd to make a checked copy. Copy selected backups to a
+separate private drive as well: local copies cannot protect against a lost laptop.
+To restore, stop the app and run Restore.cmd. Paste the full backup path without
+quotes. Type RESTORE only if you intend to replace the current records. The previous
+database is backed up first. Restart normally and confirm the records are correct.
+
+UPDATES AND REMOVAL
+Stop and back up first. Extract a new application ZIP to a new folder and run its
+EXE. Your default data folder stays separate. Do not copy another person's database
+over yours. Unpublished Phase 4 migration histories require manual reconciliation.
+To remove the program, delete its extracted folder. Records remain in the separate
+data folder; erase those only if you intend to delete them and have the backup needed.
+
+TROUBLESHOOTING
+- Already running: close the other TechBridge window first.
+- Port 8000 busy: stop the other local server, or launch from a terminal with
+  TechBridgeCRM.exe --port 8001 and use http://127.0.0.1:8001.
+- Missing _internal or DLL: extract the complete ZIP again, not only the EXE.
+- Windows warning: this student build is unsigned. Record the warning and ask the
+  team for help. Do not disable antivirus. Source setup is also available.
+- Forgotten password: an admin can change another account's password. If all access
+  is lost, keep a backup and ask for help; do not delete the database.
+- Upgrade stopped: keep the safety copy and correct the older data first. The app
+  does not silently delete or merge duplicate records.
+
+SCOPE
+This is a single-computer SQLite demonstration added in Phase 5 for easier setup.
+The source retains the PostgreSQL 16/Docker design. These are separate databases,
+not automatically synchronised. The EXE is not a network deployment or a Mac/Linux/
+ARM installer. Ryan and Logan must record their separate-computer acceptance checks.

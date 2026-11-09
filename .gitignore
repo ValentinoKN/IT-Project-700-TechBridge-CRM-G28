@@ -9,3 +9,16 @@ test.sqlite3
 .DS_Store
 outputs/
 work/
+
+*.sqlite3
+*.sqlite3-*
+*.db
+*.log
+backups/
+build/
+dist/
+*.spec
+staticfiles/
+local-settings.json
+private/
+practice-data/

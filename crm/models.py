@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.functions import Lower, Trim
+from django.core.validators import MinValueValidator
+from django.utils import timezone
 
 
 class User(AbstractUser):
@@ -11,10 +13,18 @@ class User(AbstractUser):
     ROLE_CHOICES = [(ADMIN, "Administrator"), (MANAGER, "Manager"), (REPRESENTATIVE, "Representative")]
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default=REPRESENTATIVE)
 
+    class Meta(AbstractUser.Meta):
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(role__in=["ADMIN", "MANAGER", "REP"]),
+                name="valid_user_role",
+            ),
+        ]
+
     @property
     def can_manage_all(self):
         # One simple role check used by the views instead of repeating the same if statement everywhere.
-        return self.is_superuser or self.role in [self.ADMIN, self.MANAGER]
+        return self.role in [self.ADMIN, self.MANAGER]
 
 
 class Company(models.Model):
@@ -28,24 +38,20 @@ class Company(models.Model):
 
     class Meta:
         ordering = ["name"]
-        constraints = [
-            # The database treats "Cedar IT" and " cedar it " as the same name. This still works if someone skips the form.
-            models.UniqueConstraint(Lower(Trim("name")), name="unique_company_name_ignoring_case", violation_error_message="A company with this name already exists."),
-        ]
+        constraints = [models.UniqueConstraint(Lower(Trim("name")), name="unique_company_name_ignoring_case", violation_error_message="A company with this name already exists.")]
 
     def __str__(self):
         return self.name
 
 
 class Contact(models.Model):
-    # PROTECT stops a company being deleted while it still has contacts. CASCADE would have deleted its whole history with it.
     company = models.ForeignKey(Company, on_delete=models.PROTECT, related_name="contacts")
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField()
     phone = models.CharField(max_length=30, blank=True)
     assigned_to = models.ForeignKey(User, on_delete=models.PROTECT, related_name="contacts")
-    # Contacts saved before this field existed get the date the migration ran. Their real creation date was never recorded.
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -57,7 +63,6 @@ class Contact(models.Model):
 
 class Lead(models.Model):
     STATUS_CHOICES = [("New", "New"), ("Contacted", "Contacted"), ("Qualified", "Qualified"), ("Converted", "Converted"), ("Lost", "Lost")]
-    # Same rule for contacts: one with leads, deals or activities cannot be deleted.
     contact = models.ForeignKey(Contact, on_delete=models.PROTECT, related_name="leads")
     source = models.CharField(max_length=80)
     status = models.CharField(max_length=12, choices=STATUS_CHOICES, default="New")
@@ -67,6 +72,12 @@ class Lead(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(status__in=["New", "Contacted", "Qualified", "Converted", "Lost"]),
+                name="valid_lead_status",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.contact} - {self.status}"
@@ -77,13 +88,21 @@ class Deal(models.Model):
     contact = models.ForeignKey(Contact, on_delete=models.PROTECT, related_name="deals")
     title = models.CharField(max_length=120)
     stage = models.CharField(max_length=15, choices=STAGE_CHOICES, default="Prospecting")
-    value = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    value = models.DecimalField(max_digits=12, decimal_places=2, default=0, validators=[MinValueValidator(0)])
+    source_lead = models.OneToOneField(Lead, on_delete=models.PROTECT, null=True, blank=True, related_name="converted_deal", editable=False)
     expected_close_date = models.DateField(null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.PROTECT, related_name="deals")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(stage__in=["Prospecting", "Proposal", "Negotiation", "Won", "Lost"]),
+                name="valid_deal_stage",
+            ),
+            models.CheckConstraint(condition=models.Q(value__gte=0), name="deal_value_not_negative"),
+        ]
 
     def __str__(self):
         return self.title
@@ -100,8 +119,21 @@ class Activity(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(activity_type__in=["Call", "Email", "Meeting", "Note"]),
+                name="valid_activity_type",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(contact__isnull=False, deal__isnull=True)
+                    | models.Q(contact__isnull=True, deal__isnull=False)
+                ),
+                name="activity_one_parent",
+            ),
+        ]
 
     def clean(self):
         # An activity must be about one thing. Both blank or both selected makes the record confusing.
-        if bool(self.contact) == bool(self.deal):
+        if bool(self.contact_id) == bool(self.deal_id):
             raise ValidationError("Choose one linked contact or one linked deal.")

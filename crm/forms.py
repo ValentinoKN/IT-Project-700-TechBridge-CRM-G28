@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models.functions import Lower, Trim
 from .models import Activity, Company, Contact, Deal, Lead
 
 
@@ -11,18 +12,18 @@ class BootstrapForm(forms.ModelForm):
 
 
 class CompanyForm(BootstrapForm):
+    def clean_name(self):
+        name = self.cleaned_data["name"].strip()
+        existing = Company.objects.annotate(normal_name=Lower(Trim("name"))).filter(normal_name=name.lower())
+        if self.instance.pk:
+            existing = existing.exclude(pk=self.instance.pk)
+        if existing.exists():
+            raise forms.ValidationError("A company with this name already exists.")
+        return name
+
     class Meta:
         model = Company
         fields = ["name", "industry", "phone", "email", "account_manager"]
-
-    def clean_name(self):
-        # Django has already removed spaces at the start and end. iexact ignores capitals, so "cedar it" matches "Cedar IT".
-        name = self.cleaned_data["name"]
-        # Leave out the company being edited so it can keep its own name.
-        duplicates = Company.objects.filter(name__iexact=name).exclude(pk=self.instance.pk)
-        if duplicates.exists():
-            raise forms.ValidationError("A company with this name already exists.")
-        return name
 
 
 class ContactForm(BootstrapForm):
@@ -32,6 +33,14 @@ class ContactForm(BootstrapForm):
 
 
 class LeadForm(BootstrapForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Conversion creates the deal. A normal edit must not skip that step.
+        if self.instance.pk and self.instance.status == "Converted":
+            self.fields["status"].disabled = True
+        else:
+            self.fields["status"].choices = [choice for choice in Lead.STATUS_CHOICES if choice[0] != "Converted"]
+
     class Meta:
         model = Lead
         fields = ["contact", "source", "status", "assigned_to", "notes"]

@@ -1,35 +1,34 @@
 services:
-  # PostgreSQL holds the CRM data. Docker keeps it separate from the Django web app.
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: techbridge_crm
-      POSTGRES_USER: techbridge
-      POSTGRES_PASSWORD: techbridge
+      POSTGRES_DB: ${POSTGRES_DB:-techbridge_crm}
+      POSTGRES_USER: ${POSTGRES_USER:-techbridge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U techbridge -d techbridge_crm"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
-
   web:
-    # This is the app people open in the browser on localhost:8000.
     build: .
-    command: sh -c "python manage.py migrate && python manage.py seed_demo && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py check_data && python manage.py migrate && python manage.py seed_demo && python manage.py collectstatic --noinput && waitress-serve --listen=0.0.0.0:8000 config.wsgi:application"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
-      POSTGRES_DB: techbridge_crm
-      POSTGRES_USER: techbridge
-      POSTGRES_PASSWORD: techbridge
+      POSTGRES_DB: ${POSTGRES_DB:-techbridge_crm}
+      POSTGRES_USER: ${POSTGRES_USER:-techbridge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
       POSTGRES_HOST: db
+      SECRET_KEY: ${SECRET_KEY:?Set SECRET_KEY in .env}
+      DEBUG: ${DEBUG:-0}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:?Set DEMO_PASSWORD in .env}
     volumes:
       - .:/app
     depends_on:
       db:
         condition: service_healthy
-
 volumes:
   postgres_data:

@@ -1,4 +1,5 @@
-from django.core.management.base import BaseCommand
+import os
+from django.core.management.base import BaseCommand, CommandError
 from crm.models import User
 
 
@@ -6,6 +7,9 @@ class Command(BaseCommand):
     help = "Creates demo users for the class project"
 
     def handle(self, *args, **options):
+        password = os.environ.get("DEMO_PASSWORD")
+        if not password:
+            raise CommandError("Set DEMO_PASSWORD in your local environment before creating demo accounts.")
         # These are deliberately fake class accounts. get_or_create makes the command safe to run again.
         demo_users = [
             ("admin", "Administrator", User.ADMIN, True),
@@ -15,6 +19,6 @@ class Command(BaseCommand):
         for username, first_name, role, is_superuser in demo_users:
             user, created = User.objects.get_or_create(username=username, defaults={"first_name": first_name, "role": role, "is_staff": is_superuser, "is_superuser": is_superuser})
             if created:
-                user.set_password("DemoPass123!")
+                user.set_password(password)
                 user.save()
         self.stdout.write(self.style.SUCCESS("Demo users are ready."))

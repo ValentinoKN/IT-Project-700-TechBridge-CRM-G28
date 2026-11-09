@@ -19,6 +19,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -40,9 +41,9 @@ TEMPLATES = [{
 }]
 WSGI_APPLICATION = "config.wsgi.application"
 
-# Docker uses PostgreSQL below. SQLite is only a small fallback for quick local automated tests.
+# PostgreSQL is the shared-server option. The portable Windows demo uses SQLite.
 if os.environ.get("USE_SQLITE") == "1":
-    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": BASE_DIR / "test.sqlite3"}}
+    DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": os.environ.get("SQLITE_PATH", BASE_DIR / "test.sqlite3")}}
 else:
     DATABASES = {"default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -53,12 +54,22 @@ else:
         "PORT": os.environ.get("POSTGRES_PORT", "5432"),
     }}
 
-AUTH_PASSWORD_VALIDATORS = []
+AUTH_PASSWORD_VALIDATORS = [
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator", "OPTIONS": {"min_length": 10}},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+]
 LANGUAGE_CODE = "en-za"
 TIME_ZONE = "Africa/Johannesburg"
 USE_I18N = True
 USE_TZ = True
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+WHITENOISE_USE_FINDERS = True
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # The CRM has its own User model because each user needs a role as well as a username/password.
 AUTH_USER_MODEL = "crm.User"

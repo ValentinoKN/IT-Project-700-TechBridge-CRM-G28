@@ -11,3 +11,10 @@ postgres_data
 work
 outputs
 *.log
+backups
+*.dump
+dist
+build
+*.spec
+*.db
+practice-data
