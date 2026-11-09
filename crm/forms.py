@@ -15,6 +15,15 @@ class CompanyForm(BootstrapForm):
         model = Company
         fields = ["name", "industry", "phone", "email", "account_manager"]
 
+    def clean_name(self):
+        # Django has already removed spaces at the start and end. iexact ignores capitals, so "cedar it" matches "Cedar IT".
+        name = self.cleaned_data["name"]
+        # Leave out the company being edited so it can keep its own name.
+        duplicates = Company.objects.filter(name__iexact=name).exclude(pk=self.instance.pk)
+        if duplicates.exists():
+            raise forms.ValidationError("A company with this name already exists.")
+        return name
+
 
 class ContactForm(BootstrapForm):
     class Meta:
